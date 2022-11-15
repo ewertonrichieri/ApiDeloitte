@@ -4,9 +4,9 @@ namespace WebApiDeloitte.Model
 {
     public class SchoolRecord
     {
-        public List<Bulletin> Bulletin { get; set; }
-        public List<BulletinGrade> BulletinGrade { get; set; }
-        public List<Discipline> Discipline { get; set; }
-        public List<Student> Student { get; set; }
+        public Student Student { get; set; }
+        public Discipline Discipline { get; set; }
+        public Bulletin Bulletin { get; set; }
+        public BulletinGrade BulletinGrade { get; set; }
     }
 }
