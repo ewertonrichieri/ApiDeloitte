@@ -51,13 +51,19 @@ namespace WebApiDeloitte.Controllers {
 
         [HttpPut]
         [Route("put/schoolrecords")]
-        public IActionResult PutSchoolRecords() {
-            Student student1 = _ctx.Set<Student>().Where(s => s.Id == 1).FirstOrDefault();
-            student1.Name = "Airton Lopes";
-            _ctx.Set<Student>().Update(student1);
+        public async Task<IActionResult> PutSchoolRecords() {
+            try {
+                using var reader = new StreamReader(HttpContext.Request.Body);
+                string body = await reader.ReadToEndAsync();
+                SchoolRecord schoolRec = JsonConvert.DeserializeObject<SchoolRecord>(body);
 
-            _ctx.SaveChanges();
-            return Ok();
+                ContextModel ctxModel = new ContextModel();
+                Response res = ctxModel.PutSchoolRecord(_ctx, schoolRec);
+                return StatusCode((int)res.StatusCode, !string.IsNullOrEmpty(res.Body) ? res.Body : res.Error);
+            }
+            catch (Exception ex) {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
         }
 
         [HttpDelete]
