@@ -1,4 +1,9 @@
-﻿using System.Linq;
+﻿using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace WebApiDeloitte.Model
 {
@@ -6,13 +11,13 @@ namespace WebApiDeloitte.Model
     {
         public SchoolRecord GetAllSchoolRecords(Context ctx)
         {
-            SchoolRecord schoolRecord = new SchoolRecord();
-            schoolRecord.Student = ctx.Students.ToList();
-            schoolRecord.Discipline = ctx.Disciplines.ToList();
-            schoolRecord.Bulletin = ctx.Bulletins.ToList();
-            schoolRecord.BulletinGrade = ctx.BulletinGrades.ToList();
+            List<SchoolRecord> liSchoolRec = new List<SchoolRecord>();
+            //liSchoolRec.Student.addr ctx.Students.ToList();
+            //liSchoolRec.Discipline = ctx.Disciplines.ToList();
+            //liSchoolRec.Bulletin = ctx.Bulletins.ToList();
+            //liSchoolRec.BulletinGrade = ctx.BulletinGrades.ToList();
 
-            return schoolRecord;    
+            return liSchoolRec.FirstOrDefault();    
         }
     }
 }

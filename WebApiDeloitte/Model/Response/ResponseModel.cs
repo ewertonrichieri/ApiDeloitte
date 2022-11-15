@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 
-namespace WebApiDeloitte.Model.Response
+namespace WebApiDeloitte.Model
 {
     public class ResponseModel
     {
