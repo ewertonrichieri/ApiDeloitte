@@ -11,20 +11,36 @@ namespace WebApiDeloitte.Model {
             ResponseModel respModel = new ResponseModel();
             try {
                 List<SchoolRecord> schoolRecords = new List<SchoolRecord>();
+                //List<BulletinGrade> bulletinGrades = ctx.BulletinGrades.ToList();
+                //List<Bulletin> bulletins = ctx.Bulletins.ToList();
+                //List<Discipline> disciplines = ctx.Disciplines.ToList();
+                //List<Student> students = ctx.Students.ToList();
+
+                //foreach (BulletinGrade blGrade in bulletinGrades) {
+                //    SchoolRecord schRec = new SchoolRecord();
+                //    schRec.Discipline = disciplines.Where(d => d.Id == blGrade.IdDiscipline).FirstOrDefault();
+                //    schRec.Bulletin = bulletins.Where(b => b.Id == blGrade.IdBulletin).FirstOrDefault();
+                //    schRec.Student = students.Where(s => s.Id == schRec.Bulletin.IdStudenty).FirstOrDefault();
+                //    schRec.BulletinGrade = blGrade;
+                //    if (schRec.Student != null)
+                //        schoolRecords.Add(schRec);
+                //}
+
                 List<BulletinGrade> bulletinGrades = ctx.BulletinGrades.ToList();
-                List<Bulletin> bulletins = ctx.Bulletins.ToList();
-                List<Discipline> disciplines = ctx.Disciplines.ToList();
-                List<Student> students = ctx.Students.ToList();
+                //List<Bulletin> bulletins = ctx.Bulletins.ToList();
+                //List<Discipline> disciplines = ctx.Disciplines.ToList();
+                //List<Student> students = ctx.Students.ToList();
 
                 foreach (BulletinGrade blGrade in bulletinGrades) {
                     SchoolRecord schRec = new SchoolRecord();
-                    schRec.Discipline = disciplines.Where(d => d.Id == blGrade.IdDiscipline).FirstOrDefault();
-                    schRec.Bulletin = bulletins.Where(b => b.Id == blGrade.IdBulletin).FirstOrDefault();
-                    schRec.Student = students.Where(s => s.Id == schRec.Bulletin.IdStudenty).FirstOrDefault();
+                    schRec.Discipline = ctx.Disciplines.Where(d => d.Id == blGrade.IdDiscipline).FirstOrDefault();
+                    schRec.Bulletin = ctx.Bulletins.Where(b => b.Id == blGrade.IdBulletin).FirstOrDefault();
+                    schRec.Student = ctx.Students.Where(s => s.Id == schRec.Bulletin.IdStudenty).FirstOrDefault();
                     schRec.BulletinGrade = blGrade;
                     if (schRec.Student != null)
                         schoolRecords.Add(schRec);
                 }
+
                 return respModel.GetResponse(JsonConvert.SerializeObject(schoolRecords), HttpStatusCode.OK);
             }
             catch (Exception ex) {
