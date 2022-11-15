@@ -11,25 +11,7 @@ namespace WebApiDeloitte.Model {
             ResponseModel respModel = new ResponseModel();
             try {
                 List<SchoolRecord> schoolRecords = new List<SchoolRecord>();
-                //List<BulletinGrade> bulletinGrades = ctx.BulletinGrades.ToList();
-                //List<Bulletin> bulletins = ctx.Bulletins.ToList();
-                //List<Discipline> disciplines = ctx.Disciplines.ToList();
-                //List<Student> students = ctx.Students.ToList();
-
-                //foreach (BulletinGrade blGrade in bulletinGrades) {
-                //    SchoolRecord schRec = new SchoolRecord();
-                //    schRec.Discipline = disciplines.Where(d => d.Id == blGrade.IdDiscipline).FirstOrDefault();
-                //    schRec.Bulletin = bulletins.Where(b => b.Id == blGrade.IdBulletin).FirstOrDefault();
-                //    schRec.Student = students.Where(s => s.Id == schRec.Bulletin.IdStudenty).FirstOrDefault();
-                //    schRec.BulletinGrade = blGrade;
-                //    if (schRec.Student != null)
-                //        schoolRecords.Add(schRec);
-                //}
-
                 List<BulletinGrade> bulletinGrades = ctx.BulletinGrades.ToList();
-                //List<Bulletin> bulletins = ctx.Bulletins.ToList();
-                //List<Discipline> disciplines = ctx.Disciplines.ToList();
-                //List<Student> students = ctx.Students.ToList();
 
                 foreach (BulletinGrade blGrade in bulletinGrades) {
                     SchoolRecord schRec = new SchoolRecord();
@@ -46,6 +28,53 @@ namespace WebApiDeloitte.Model {
             catch (Exception ex) {
                 return respModel.GetResponse(string.Empty, HttpStatusCode.BadRequest, ex.Message);
             }
+        }
+
+        public Response PutSchoolRecord(Context ctx, SchoolRecord newSchoolRec) {
+            ResponseModel respModel = new ResponseModel();
+            try {
+                _ctx = ctx;
+                int idBulletinGrade = newSchoolRec.BulletinGrade.Id;
+                BulletinGrade blGrade = _ctx.Set<BulletinGrade>().Where(s => s.Id == idBulletinGrade).FirstOrDefault();
+                if (blGrade == null)
+                    return respModel.GetResponse(string.Empty, HttpStatusCode.NotModified, Msg.BulletinGradeNotModified);
+
+                SchoolRecord oldSchoolRec = GetSchoolRecordByBulletinGrade(blGrade);
+                UpdateSchoolRecord(oldSchoolRec, newSchoolRec);
+
+                return respModel.GetResponse(Msg.registerChangedOk, HttpStatusCode.OK);
+            }
+            catch (Exception ex) {
+                return respModel.GetResponse(string.Empty, HttpStatusCode.BadRequest, ex.Message);
+            }
+        }
+
+        private SchoolRecord GetSchoolRecordByBulletinGrade(BulletinGrade blGrade) {
+            SchoolRecord schRec = new SchoolRecord();
+            schRec.Discipline = _ctx.Disciplines.Where(d => d.Id == blGrade.IdDiscipline).FirstOrDefault();
+            schRec.Bulletin = _ctx.Bulletins.Where(b => b.Id == blGrade.IdBulletin).FirstOrDefault();
+            schRec.Student = _ctx.Students.Where(s => s.Id == schRec.Bulletin.IdStudenty).FirstOrDefault();
+            schRec.BulletinGrade = blGrade;
+            return schRec;
+        }
+
+        private void UpdateSchoolRecord(SchoolRecord oldSchoolRec, SchoolRecord newSchoolRec) {
+            oldSchoolRec.Student.Name = newSchoolRec.Student.Name;
+            oldSchoolRec.Student.Email = newSchoolRec.Student.Email;
+            oldSchoolRec.Student.BirthDate = newSchoolRec.Student.BirthDate;
+            _ctx.Set<Student>().Update(oldSchoolRec.Student);
+
+            oldSchoolRec.Discipline.Name = newSchoolRec.Discipline.Name;
+            oldSchoolRec.Discipline.Workload = newSchoolRec.Discipline.Workload;
+            _ctx.Set<Discipline>().Update(oldSchoolRec.Discipline);
+
+            oldSchoolRec.Bulletin.DeliveryDate = newSchoolRec.Bulletin.DeliveryDate;
+            _ctx.Set<Bulletin>().Update(oldSchoolRec.Bulletin);
+
+            oldSchoolRec.BulletinGrade.Grade = newSchoolRec.BulletinGrade.Grade;
+            _ctx.Set<BulletinGrade>().Update(oldSchoolRec.BulletinGrade);
+
+            _ctx.SaveChanges();
         }
 
         public Response PostSchoolRecord(Context ctx, SchoolRecord schoolRec) {
@@ -94,6 +123,32 @@ namespace WebApiDeloitte.Model {
 
         private void PostBulletinGradeBySchoolRecord(SchoolRecord schoolRec) {
             _ctx.Set<BulletinGrade>().Add(schoolRec.BulletinGrade);
+        }
+
+        public Response DeleteSchoolRecordByIdBulletinGrade(Context ctx, int idBulletinGrade) {
+            ResponseModel respModel = new ResponseModel();
+            try {
+                _ctx = ctx;
+                BulletinGrade blGrade = _ctx.Set<BulletinGrade>().Where(s => s.Id == idBulletinGrade).FirstOrDefault();
+                if (blGrade == null)
+                    return respModel.GetResponse(string.Empty, HttpStatusCode.NotModified, Msg.BulletinGradeNotModified);
+
+                SchoolRecord schoolRec = GetSchoolRecordByBulletinGrade(blGrade);
+                DeleteSchoolRecord(schoolRec);
+
+                return respModel.GetResponse(Msg.registerDeletedOk, HttpStatusCode.OK);
+            }
+            catch (Exception ex) {
+                return respModel.GetResponse(string.Empty, HttpStatusCode.BadRequest, ex.Message);
+            }
+        }
+
+        private void DeleteSchoolRecord(SchoolRecord schRec) {
+            _ctx.Set<Student>().Remove(schRec.Student);
+            _ctx.Set<Discipline>().Remove(schRec.Discipline);
+            _ctx.Set<Bulletin>().Remove(schRec.Bulletin);
+            _ctx.Set<BulletinGrade>().Remove(schRec.BulletinGrade);
+            _ctx.SaveChanges();
         }
     }
 }

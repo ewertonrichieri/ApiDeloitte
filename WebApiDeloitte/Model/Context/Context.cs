@@ -42,9 +42,6 @@ namespace WebApiDeloitte.Model
             modelBuilder.Entity<Discipline>().Property(d => d.Id).HasColumnType("Int").UseMySqlIdentityColumn().IsRequired();
             modelBuilder.Entity<Discipline>().Property(d => d.Name).HasColumnType("nvarchar(100)").IsRequired();
             modelBuilder.Entity<Discipline>().Property(d => d.Workload).HasColumnType("int").IsRequired();
-
-            //modelBuilder.Entity<User>().HasOne<UserGroup>().WithMany().HasPrincipalKey(ug => ug.Id).HasForeignKey(u => u.UserGroupId).OnDelete(DeleteBehavior.NoAction).HasConstraintName("FK_Users_UserGroups");
-            //modelBuilder.Entity<Bulletin>().HasOne<BulletinGrade>().WithMany().HasPrincipalKey(bg => bg.Id).HasForeignKey(d => d.id)
         }
     }
 }
