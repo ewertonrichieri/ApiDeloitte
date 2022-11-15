@@ -2,7 +2,6 @@
 using Newtonsoft.Json;
 using System;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using WebApiDeloitte.Model;
@@ -68,12 +67,15 @@ namespace WebApiDeloitte.Controllers {
 
         [HttpDelete]
         [Route("del/schoolrecords")]
-        public IActionResult DelSchoolRecords(int id) {
-            Student student = _ctx.Set<Student>().Where(s => s.Id == id).FirstOrDefault();
-            _ctx.Set<Student>().Remove(student);
-            _ctx.SaveChanges();
-
-            return Ok(student);
+        public IActionResult DelSchoolRecords(int idBulletinGrade) {
+            try {
+                ContextModel ctxModel = new ContextModel();
+                Response res = ctxModel.DeleteSchoolRecordByIdBulletinGrade(_ctx, idBulletinGrade);
+                return StatusCode((int)res.StatusCode, !string.IsNullOrEmpty(res.Body) ? res.Body : res.Error);
+            }
+            catch (Exception ex) {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
         }
     }
 }

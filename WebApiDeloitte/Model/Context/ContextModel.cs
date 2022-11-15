@@ -41,7 +41,6 @@ namespace WebApiDeloitte.Model {
 
                 SchoolRecord oldSchoolRec = GetSchoolRecordByBulletinGrade(blGrade);
                 UpdateSchoolRecord(oldSchoolRec, newSchoolRec);
-                _ctx.SaveChanges();
 
                 return respModel.GetResponse(Msg.registerChangedOk, HttpStatusCode.OK);
             }
@@ -74,6 +73,8 @@ namespace WebApiDeloitte.Model {
 
             oldSchoolRec.BulletinGrade.Grade = newSchoolRec.BulletinGrade.Grade;
             _ctx.Set<BulletinGrade>().Update(oldSchoolRec.BulletinGrade);
+
+            _ctx.SaveChanges();
         }
 
         public Response PostSchoolRecord(Context ctx, SchoolRecord schoolRec) {
@@ -122,6 +123,32 @@ namespace WebApiDeloitte.Model {
 
         private void PostBulletinGradeBySchoolRecord(SchoolRecord schoolRec) {
             _ctx.Set<BulletinGrade>().Add(schoolRec.BulletinGrade);
+        }
+
+        public Response DeleteSchoolRecordByIdBulletinGrade(Context ctx, int idBulletinGrade) {
+            ResponseModel respModel = new ResponseModel();
+            try {
+                _ctx = ctx;
+                BulletinGrade blGrade = _ctx.Set<BulletinGrade>().Where(s => s.Id == idBulletinGrade).FirstOrDefault();
+                if (blGrade == null)
+                    return respModel.GetResponse(string.Empty, HttpStatusCode.NotModified, Msg.BulletinGradeNotModified);
+
+                SchoolRecord schoolRec = GetSchoolRecordByBulletinGrade(blGrade);
+                DeleteSchoolRecord(schoolRec);
+
+                return respModel.GetResponse(Msg.registerDeletedOk, HttpStatusCode.OK);
+            }
+            catch (Exception ex) {
+                return respModel.GetResponse(string.Empty, HttpStatusCode.BadRequest, ex.Message);
+            }
+        }
+
+        private void DeleteSchoolRecord(SchoolRecord schRec) {
+            _ctx.Set<Student>().Remove(schRec.Student);
+            _ctx.Set<Discipline>().Remove(schRec.Discipline);
+            _ctx.Set<Bulletin>().Remove(schRec.Bulletin);
+            _ctx.Set<BulletinGrade>().Remove(schRec.BulletinGrade);
+            _ctx.SaveChanges();
         }
     }
 }
