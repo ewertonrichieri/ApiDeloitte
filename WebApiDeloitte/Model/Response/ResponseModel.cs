@@ -5,11 +5,11 @@ namespace WebApiDeloitte.Model
 {
     public class ResponseModel
     {
-        public Response GetResponse(string msg, HttpStatusCode statusCode, string error)
+        public Response GetResponse(string msg, HttpStatusCode statusCode, string error = "")
         {
             try
             {
-                return new Response() { Msg = msg, StatusCode = statusCode, Error = error };
+                return new Response() { Body = msg, StatusCode = statusCode, Error = error };
             }
             catch (Exception ex)
             {

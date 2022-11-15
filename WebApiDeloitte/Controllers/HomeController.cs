@@ -1,13 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using WebApiDeloitte.Model;
-using WebApiDeloitte.Model.Msg;
 
 namespace WebApiDeloitte.Controllers {
     [Route("api/deloitte")]
@@ -23,8 +21,9 @@ namespace WebApiDeloitte.Controllers {
         [Route("get/schoolrecords")]
         public IActionResult GetSchoolRecords() {
             try {
-                IList<Student> schoolRecord = _ctx.Students.ToList();
-                return Ok(schoolRecord);
+                ContextModel ctxModel = new ContextModel();
+                Response res = ctxModel.GetAllSchoolRecord(_ctx);
+                return StatusCode((int)res.StatusCode, !string.IsNullOrEmpty(res.Body) ? res.Body : res.Error);
             }
             catch (Exception ex) {
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
@@ -40,13 +39,14 @@ namespace WebApiDeloitte.Controllers {
                 SchoolRecord schoolRec = JsonConvert.DeserializeObject<SchoolRecord>(body);
 
                 ContextModel ctxModel = new ContextModel();
-                ctxModel.PostSchoolRecord(_ctx, schoolRec);
-                return Ok(Msg.registerOk);
+                Response res = ctxModel.PostSchoolRecord(_ctx, schoolRec);
+
+                return StatusCode((int)res.StatusCode, !string.IsNullOrEmpty(res.Body) ? res.Body : res.Error);
             }
-            catch(Exception ex) {
+            catch (Exception ex) {
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
             }
-       
+
         }
 
         [HttpPut]
@@ -62,14 +62,12 @@ namespace WebApiDeloitte.Controllers {
 
         [HttpDelete]
         [Route("del/schoolrecords")]
-        public IActionResult DelSchoolRecords() {
-            Student student1 = _ctx.Set<Student>().Where(s => s.Id == 5).FirstOrDefault();
-            student1.Name = "Airton Lopes";
-            _ctx.Set<Student>().Remove(student1);
-
+        public IActionResult DelSchoolRecords(int id) {
+            Student student = _ctx.Set<Student>().Where(s => s.Id == id).FirstOrDefault();
+            _ctx.Set<Student>().Remove(student);
             _ctx.SaveChanges();
 
-            return Ok(student1);
+            return Ok(student);
         }
     }
 }
