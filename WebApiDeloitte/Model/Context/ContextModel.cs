@@ -4,10 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
-namespace WebApiDeloitte.Model {
-    public class ContextModel {
+namespace WebApiDeloitte.Model
+{
+    public class ContextModel
+    {
         private Context _ctx;
-        public Response GetAllSchoolRecord(Context ctx) {
+        public Response GetAllSchoolRecord(Context ctx)
+        {
             ResponseModel respModel = new ResponseModel();
             try {
                 List<SchoolRecord> schoolRecords = new List<SchoolRecord>();
@@ -15,9 +18,10 @@ namespace WebApiDeloitte.Model {
 
                 foreach (BulletinGrade blGrade in bulletinGrades) {
                     SchoolRecord schRec = new SchoolRecord();
-                    schRec.Discipline = ctx.Disciplines.Where(d => d.Id == blGrade.IdDiscipline).FirstOrDefault();
+                    schRec.Discipline = GetDiscipline(ctx, blGrade);
                     schRec.Bulletin = ctx.Bulletins.Where(b => b.Id == blGrade.IdBulletin).FirstOrDefault();
-                    schRec.Student = ctx.Students.Where(s => s.Id == schRec.Bulletin.IdStudenty).FirstOrDefault();
+                    if (schRec.Bulletin != null)
+                        schRec.Student = ctx.Students.Where(s => s.Id == schRec.Bulletin.IdStudenty).FirstOrDefault();
                     schRec.BulletinGrade = blGrade;
                     if (schRec.Student != null)
                         schoolRecords.Add(schRec);
@@ -30,7 +34,14 @@ namespace WebApiDeloitte.Model {
             }
         }
 
-        public Response PutSchoolRecord(Context ctx, SchoolRecord newSchoolRec) {
+        private Discipline GetDiscipline(Context ctx, BulletinGrade blGrade)
+        {
+            Discipline discipline = ctx.Disciplines.Where(d => d.Id == blGrade.IdDiscipline).FirstOrDefault();
+            return discipline == null ? new Discipline() { Name = String.Empty } : discipline;
+        }
+
+        public Response PutSchoolRecord(Context ctx, SchoolRecord newSchoolRec)
+        {
             ResponseModel respModel = new ResponseModel();
             try {
                 _ctx = ctx;
@@ -49,7 +60,8 @@ namespace WebApiDeloitte.Model {
             }
         }
 
-        private SchoolRecord GetSchoolRecordByBulletinGrade(BulletinGrade blGrade) {
+        private SchoolRecord GetSchoolRecordByBulletinGrade(BulletinGrade blGrade)
+        {
             SchoolRecord schRec = new SchoolRecord();
             schRec.Discipline = _ctx.Disciplines.Where(d => d.Id == blGrade.IdDiscipline).FirstOrDefault();
             schRec.Bulletin = _ctx.Bulletins.Where(b => b.Id == blGrade.IdBulletin).FirstOrDefault();
@@ -58,7 +70,8 @@ namespace WebApiDeloitte.Model {
             return schRec;
         }
 
-        private void UpdateSchoolRecord(SchoolRecord oldSchoolRec, SchoolRecord newSchoolRec) {
+        private void UpdateSchoolRecord(SchoolRecord oldSchoolRec, SchoolRecord newSchoolRec)
+        {
             oldSchoolRec.Student.Name = newSchoolRec.Student.Name;
             oldSchoolRec.Student.Email = newSchoolRec.Student.Email;
             oldSchoolRec.Student.BirthDate = newSchoolRec.Student.BirthDate;
@@ -77,7 +90,8 @@ namespace WebApiDeloitte.Model {
             _ctx.SaveChanges();
         }
 
-        public Response PostSchoolRecord(Context ctx, SchoolRecord schoolRec) {
+        public Response PostSchoolRecord(Context ctx, SchoolRecord schoolRec)
+        {
             ResponseModel respModel = new ResponseModel();
             try {
                 _ctx = ctx;
@@ -102,30 +116,35 @@ namespace WebApiDeloitte.Model {
             }
         }
 
-        private int PostStudentAndGetId(Student std) {
+        private int PostStudentAndGetId(Student std)
+        {
             _ctx.Set<Student>().Add(std);
             _ctx.SaveChanges();
             return _ctx.Set<Student>().Where(s => s.Name == std.Name
             && s.Email == std.Email && s.BirthDate == std.BirthDate).FirstOrDefault().Id;
         }
 
-        private int PostBulletinAndGetId(Bulletin bullt) {
+        private int PostBulletinAndGetId(Bulletin bullt)
+        {
             _ctx.Set<Bulletin>().Add(bullt);
             _ctx.SaveChanges();
             return _ctx.Bulletins.Where(b => b.IdStudenty == bullt.IdStudenty).FirstOrDefault().Id;
         }
 
-        private int PostDisciplineAndGetId(Discipline dp) {
+        private int PostDisciplineAndGetId(Discipline dp)
+        {
             _ctx.Set<Discipline>().Add(dp);
             _ctx.SaveChanges();
             return _ctx.Set<Discipline>().Where(d => d.Name == dp.Name && d.Workload == dp.Workload).FirstOrDefault().Id;
         }
 
-        private void PostBulletinGradeBySchoolRecord(SchoolRecord schoolRec) {
+        private void PostBulletinGradeBySchoolRecord(SchoolRecord schoolRec)
+        {
             _ctx.Set<BulletinGrade>().Add(schoolRec.BulletinGrade);
         }
 
-        public Response DeleteSchoolRecordByIdBulletinGrade(Context ctx, int idBulletinGrade) {
+        public Response DeleteSchoolRecordByIdBulletinGrade(Context ctx, int idBulletinGrade)
+        {
             ResponseModel respModel = new ResponseModel();
             try {
                 _ctx = ctx;
@@ -143,11 +162,12 @@ namespace WebApiDeloitte.Model {
             }
         }
 
-        private void DeleteSchoolRecord(SchoolRecord schRec) {
-            _ctx.Set<Student>().Remove(schRec.Student);
-            _ctx.Set<Discipline>().Remove(schRec.Discipline);
-            _ctx.Set<Bulletin>().Remove(schRec.Bulletin);
-            _ctx.Set<BulletinGrade>().Remove(schRec.BulletinGrade);
+        private void DeleteSchoolRecord(SchoolRecord schRec)
+        {
+            if(schRec.Student != null) _ctx.Set<Student>().Remove(schRec.Student);
+            if(schRec.Discipline != null) _ctx.Set<Discipline>().Remove(schRec.Discipline);
+            if(schRec.Bulletin != null) _ctx.Set<Bulletin>().Remove(schRec.Bulletin);
+            if(schRec.BulletinGrade != null) _ctx.Set<BulletinGrade>().Remove(schRec.BulletinGrade);
             _ctx.SaveChanges();
         }
     }

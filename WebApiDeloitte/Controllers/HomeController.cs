@@ -22,7 +22,7 @@ namespace WebApiDeloitte.Controllers {
             try {
                 ContextModel ctxModel = new ContextModel();
                 Response res = ctxModel.GetAllSchoolRecord(_ctx);
-                return StatusCode((int)res.StatusCode, !string.IsNullOrEmpty(res.Body) ? res.Body : res.Error);
+                return StatusCode((int)res.StatusCode, !string.IsNullOrEmpty(res.Body) ? res : res.Error);
             }
             catch (Exception ex) {
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
@@ -35,12 +35,14 @@ namespace WebApiDeloitte.Controllers {
             try {
                 using var reader = new StreamReader(HttpContext.Request.Body);
                 string body = await reader.ReadToEndAsync();
+                if (body.Contains("body")) body = GetNewBody(body);
+
                 SchoolRecord schoolRec = JsonConvert.DeserializeObject<SchoolRecord>(body);
 
                 ContextModel ctxModel = new ContextModel();
                 Response res = ctxModel.PostSchoolRecord(_ctx, schoolRec);
 
-                return StatusCode((int)res.StatusCode, !string.IsNullOrEmpty(res.Body) ? res.Body : res.Error);
+                return StatusCode((int)res.StatusCode, !string.IsNullOrEmpty(res.Body) ? res : res.Error);
             }
             catch (Exception ex) {
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
@@ -58,7 +60,7 @@ namespace WebApiDeloitte.Controllers {
 
                 ContextModel ctxModel = new ContextModel();
                 Response res = ctxModel.PutSchoolRecord(_ctx, schoolRec);
-                return StatusCode((int)res.StatusCode, !string.IsNullOrEmpty(res.Body) ? res.Body : res.Error);
+                return StatusCode((int)res.StatusCode, !string.IsNullOrEmpty(res.Body) ? res : res.Error);
             }
             catch (Exception ex) {
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
@@ -71,11 +73,16 @@ namespace WebApiDeloitte.Controllers {
             try {
                 ContextModel ctxModel = new ContextModel();
                 Response res = ctxModel.DeleteSchoolRecordByIdBulletinGrade(_ctx, idBulletinGrade);
-                return StatusCode((int)res.StatusCode, !string.IsNullOrEmpty(res.Body) ? res.Body : res.Error);
+                return StatusCode((int)res.StatusCode, !string.IsNullOrEmpty(res.Body) ? res : res.Error);
             }
             catch (Exception ex) {
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
             }
+        }
+
+        private string GetNewBody(string body)
+        {
+           return body.Replace("\"body\":[", string.Empty).Replace("]", string.Empty).Replace("{{", "{").Replace("}}", "}");
         }
     }
 }
