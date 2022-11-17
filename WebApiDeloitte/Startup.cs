@@ -24,8 +24,7 @@ namespace WebApiDeloitte
             string mySqlConnectionStr = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContextPool<Context>(options => options.UseMySql(mySqlConnectionStr, ServerVersion.AutoDetect(mySqlConnectionStr)));
 
-            services.AddCors(c =>
-            {
+            services.AddCors(c => {
                 c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin());
             });
 
@@ -35,21 +34,26 @@ namespace WebApiDeloitte
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
+            if (env.IsDevelopment()) {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseDefaultFiles();
+
+            app.UseStaticFiles();
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
 
-            app.UseCors(a => a.AllowAnyOrigin());
+            app.UseCors(a => a
+             .AllowAnyOrigin()
+             .AllowAnyMethod()
+             .AllowAnyHeader());
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
+            app.UseEndpoints(endpoints => {
                 endpoints.MapControllers();
             });
         }
